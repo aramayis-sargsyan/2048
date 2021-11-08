@@ -1,42 +1,48 @@
-import { Graphics } from 'pixi.js';
-import { BoardConfig } from '../config';
-import { Ball } from './ball';
+import { Graphics } from "pixi.js";
+import { Number } from "../cell-number";
+import { boardConfig } from "./board-config";
+import { cell_collor } from "./constants";
 
 export class Cell extends Graphics {
-    row: number;
-    column: number;
-    i: number;
-    j: number;
-    ball: Ball;
+  newCell: Cell;
+  number: Number;
+  collor: number;
+  constructor() {
+    super();
+  }
 
-    constructor(row: number, column: number) {
-        super();
-        this.row = row;
-        this.column = column;
-        this.interactive = true;
-
-        this.on('pointerdown', this._onClick, this);
+  build(cellWidth, num) {
+    let i = Math.log(num) / Math.log(2) - 1;
+    if (num === 0) {
+      this.collor = 0x999999;
+    } else if (num === null) {
+      this.collor = 0x777777;
+    } else {
+      this.collor = cell_collor[i];
     }
 
-    build(lineStyle, cellWidth) {
-        const { cell_radius } = BoardConfig;
-        this.lineStyle(lineStyle, 0x000000);
-        this.beginFill(0xffffff);
-        this.drawRoundedRect(lineStyle, lineStyle, cellWidth - lineStyle, cellWidth - lineStyle, cell_radius);
-        this.endFill();
+    this.beginFill(this.collor);
+    this.drawRect(0, 0, cellWidth, cellWidth);
+    this.endFill();
+    this.newCell = null;
 
-        this.pivot.x = this.width / 2;
-        this.pivot.y = this.height / 2;
+    this.pivot.x = this.width / 2;
+    this.pivot.y = this.height / 2;
+
+    if (num) {
+      if (num === -1) {
+        this.writeNumber(4);
+      } else if (num < 0) {
+        this.writeNumber(2);
+      } else {
+        this.writeNumber(num);
+      }
     }
+  }
 
-    setBall(cell, ball) {
-        const { cell_width } = BoardConfig;
-        ball.position.set(cell_width / 2, cell_width / 2);
-
-        cell.addChild(ball);
-    }
-
-    _onClick() {
-        this.emit('onClick', this);
-    }
+  writeNumber(num) {
+    this.number = new Number();
+    this.number.cellNumber(num);
+    this.addChild(this.number);
+  }
 }

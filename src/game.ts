@@ -1,12 +1,14 @@
 import * as PIXI from "pixi.js";
+import { Board } from "./board/board";
+import { cell_collor } from "./board/constants";
 
 export class Game extends PIXI.Application {
-  x: number[];
+  _board: Board;
   constructor() {
     super({
       width: window.innerWidth,
       height: window.innerHeight,
-      backgroundColor: 0x444444,
+      backgroundColor: 0xdddddd,
     });
 
     document.body.appendChild(this.view);
@@ -18,7 +20,9 @@ export class Game extends PIXI.Application {
   }
 
   _onLoadComplete() {
-    console.log(7);
+    this._buildBoard();
+    this._board.buildNewCell(null, null);
+    this._board.buildNewCell(null, null);
   }
 
   _resize(width?, height?) {
@@ -38,6 +42,13 @@ export class Game extends PIXI.Application {
 
   _resizeRenderer(width, height) {
     this.renderer.resize(width, height);
+  }
+
+  _buildBoard() {
+    this._board = new Board();
+    this._board.build();
+    this._board.buildEmptyCell();
+    this.stage.addChild(this._board);
   }
 
   _update() {}
