@@ -4,7 +4,6 @@ import { boardConfig } from "./board-config";
 import { cell_collor } from "./constants";
 
 export class Cell extends Graphics {
-  newCell: Cell;
   number: Number;
   collor: number;
   constructor() {
@@ -13,6 +12,13 @@ export class Cell extends Graphics {
 
   build(cellWidth, num) {
     let i = Math.log(num) / Math.log(2) - 1;
+
+    if (num === -1) {
+      i = 1;
+    } else if (num < 0) {
+      i = 0;
+    }
+
     if (num === 0) {
       this.collor = 0x999999;
     } else if (num === null) {
@@ -24,7 +30,6 @@ export class Cell extends Graphics {
     this.beginFill(this.collor);
     this.drawRect(0, 0, cellWidth, cellWidth);
     this.endFill();
-    this.newCell = null;
 
     this.pivot.x = this.width / 2;
     this.pivot.y = this.height / 2;

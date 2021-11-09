@@ -22,7 +22,7 @@ export class Game extends PIXI.Application {
   _onLoadComplete() {
     this._buildBoard();
     this._board.buildNewCell(null, null);
-    this._board.buildNewCell(null, null);
+    // this._board.buildNewCell(null, null);
   }
 
   _resize(width?, height?) {

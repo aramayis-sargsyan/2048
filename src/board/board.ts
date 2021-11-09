@@ -3,23 +3,28 @@ import { Cell } from "./cell";
 import { boardConfig } from "./board-config";
 import { cell_collor } from "./constants";
 import { getRandomInRange } from "../utils";
+import gsap from "gsap";
+import { Circ } from "gsap/gsap-core";
 
 export class Board extends Container {
   board: Cell;
   matrix: Cell[][];
   backCells: Cell[];
   bool: boolean;
+  newCell: Cell;
+
   constructor() {
     super();
     this.matrix = [];
     this.backCells = [];
     this.bool = false;
+    this.newCell = null;
   }
 
   build() {
-    const { board_width } = boardConfig;
+    const { cell_width, cell_length, cell_gap } = boardConfig;
     this.board = new Cell();
-    this.board.build(board_width, 0);
+    this.board.build((cell_width + cell_gap) * cell_length + cell_gap, 0);
     this.board.position.set(window.innerWidth / 2, window.innerHeight / 2);
     this.addChild(this.board);
     document.addEventListener("keydown", this.onKeyDown.bind(this));
@@ -50,36 +55,37 @@ export class Board extends Container {
     let number = num;
 
     const emptyCells = this.backCells.filter((cell) => {
-      return cell.newCell === null;
+      return this.newCell === null;
     });
     let i = Math.floor(getRandomInRange(0, emptyCells.length));
     if (num === null) {
       number = Math.ceil(getRandomInRange(-10, -1));
     }
 
-    if (cell) {
-      cell.newCell = new Cell();
-      console.log(number);
-      cell.newCell.build(cell_width, number);
-      cell.newCell.position.set(cell.width / 2, cell.height / 2);
-      cell.addChild(cell.newCell);
-    } else {
-      emptyCells[i].newCell = new Cell();
-      console.log(number);
-      emptyCells[i].newCell.build(cell_width, number);
-      emptyCells[i].newCell.position.set(
-        emptyCells[i].width / 2,
-        emptyCells[i].height / 2
-      );
-      emptyCells[i].addChild(emptyCells[i].newCell);
-    }
+    // if (cell) {
+    //   cell.newCell = new Cell();
+    //   cell.newCell.build(cell_width, number);
+    //   cell.newCell.position.set(cell.width / 2, cell.height / 2);
+    //   cell.addChild(cell.newCell);
+    // } else {
+    this.newCell = new Cell();
+    this.newCell.build(cell_width, number);
+    console.log(8);
+
+    this.newCell.position.set(
+      emptyCells[i].position.x,
+      emptyCells[i].position.y
+    );
+    this.board.addChild(this.newCell);
+    // }
   }
 
   transferCell(keyCode) {
+    const { cell_length } = boardConfig;
     this.bool = false;
 
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < cell_length; i++) {
+      for (let j = 0; j < cell_length; j++) {
         if (keyCode === 37) {
           this.joinCell(1, 0, i, j);
         } else if (keyCode === 38) {
@@ -88,8 +94,8 @@ export class Board extends Container {
       }
     }
 
-    for (let i = 3; i >= 0; i--) {
-      for (let j = 3; j >= 0; j--) {
+    for (let i = cell_length - 1; i >= 0; i--) {
+      for (let j = cell_length - 1; j >= 0; j--) {
         if (keyCode === 39) {
           this.joinCell(-1, 0, i, j);
         } else if (keyCode === 40) {
@@ -100,48 +106,61 @@ export class Board extends Container {
   }
 
   joinCell(keyCodeX, keyCodeY, i, j) {
+    const { cell_length } = boardConfig;
+
     if (keyCodeX === 1 && j === 0) {
       return;
     }
-    if (keyCodeX === -1 && j === 3) {
+    if (keyCodeX === -1 && j === cell_length - 1) {
       return;
     }
     if (keyCodeY === 1 && i === 0) {
       return;
     }
-    if (keyCodeY === -1 && i === 3) {
+    if (keyCodeY === -1 && i === cell_length - 1) {
       return;
     }
 
-    if (this.matrix[i][j].newCell) {
-      if (!this.matrix[i - keyCodeY][j - keyCodeX].newCell) {
+    if (this.newCell) {
+      // console.log(this.position.x);
+      // console.log(this.matrix[i - keyCodeY][j - keyCodeX].position.x);
+      console.log(this);
+      if (this.newCell) {
         this.bool = true;
-        console.log(this.matrix[i][j].newCell.number.number);
 
-        this.buildNewCell(
-          this.matrix[i][j].newCell.number.number,
-          this.matrix[i - keyCodeY][j - keyCodeX]
-        );
-        this.matrix[i][j].newCell.destroy();
-        this.matrix[i][j].newCell = null;
+        gsap.to(this.newCell, {
+          x: 280,
+          duration: 2,
+          ease: Circ.easeOut,
+        });
+
+        // console.log(this.newCell);
+        // console.log(this.matrix[i - keyCodeY][j - keyCodeX]);
+
+        // this.buildNewCell(
+        //   this.newCell.number.number,
+        //   this.matrix[i - keyCodeY][j - keyCodeX]
+        // );
+        // this.newCell.destroy();
+        // this.newCell = null;
+
         j = j - keyCodeX;
         i = i - keyCodeY;
+
         this.joinCell(keyCodeX, keyCodeY, i, j);
-      } else {
-        if (
-          this.matrix[i - keyCodeY][j - keyCodeX].newCell.number.number ===
-          this.matrix[i][j].newCell.number.number
-        ) {
-          this.bool = true;
-          this.matrix[i - keyCodeY][j - keyCodeX].newCell.destroy();
-          this.matrix[i - keyCodeY][j - keyCodeX].newCell = null;
-          this.buildNewCell(
-            this.matrix[i][j].newCell.number.number * 2,
-            this.matrix[i - keyCodeY][j - keyCodeX]
-          );
-          this.matrix[i][j].newCell.destroy();
-          this.matrix[i][j].newCell = null;
-        }
+        // } else {
+        //   if (this.newCell.number.number === this.newCell.number.number) {
+        //     this.bool = true;
+        //     // this.newCell.destroy();
+        //     // this.newCell = null;
+        //     console.log(7);
+        //     this.buildNewCell(
+        //       this.newCell.number.number * 2,
+        //       this.matrix[i - keyCodeY][j - keyCodeX]
+        //     );
+        //     this.newCell.destroy();
+        //     this.newCell = null;
+        // }
       }
     }
   }
