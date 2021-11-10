@@ -1,13 +1,13 @@
 import { Container, Text, TextStyle } from "pixi.js";
 import { boardConfig } from "./board/board-config";
 
-export class Number extends Container {
+export class NumberCellComponent extends Container {
   style: TextStyle;
-  number: number;
+  text: number;
   constructor() {
     super();
 
-    this.number = 0;
+    this.text = 0;
     this.style = new TextStyle({
       fontFamily: "Arial",
       fontSize: 50,
@@ -18,9 +18,9 @@ export class Number extends Container {
   }
 
   cellNumber(number) {
-    this.number = number;
+    this.text = number;
     const { cell_width } = boardConfig;
-    let text = new Text(`${this.number}`, this.style);
+    let text = new Text(`${this.text}`, this.style);
     text.pivot.x = text.width / 2;
     text.pivot.y = text.height / 2;
     text.position.set(cell_width / 2, cell_width / 2);

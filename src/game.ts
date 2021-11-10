@@ -21,8 +21,9 @@ export class Game extends PIXI.Application {
 
   _onLoadComplete() {
     this._buildBoard();
-    this._board.buildNewCell(null, null);
-    // this._board.buildNewCell(null, null);
+    for (let i = 0; i < 2; i++) {
+      this._board.buildNewCell(2, null);
+    }
   }
 
   _resize(width?, height?) {
@@ -47,7 +48,7 @@ export class Game extends PIXI.Application {
   _buildBoard() {
     this._board = new Board();
     this._board.build();
-    this._board.buildEmptyCell();
+    this._board.buildBackCell();
     this.stage.addChild(this._board);
   }
 
