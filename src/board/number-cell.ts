@@ -3,7 +3,7 @@ import { NumberCellComponent } from "../number-cell-component";
 
 export class NumberCell extends Cell {
   cellNumber: NumberCellComponent;
-  index: number;
+  index: number[];
   public text: number;
   constructor(w, num) {
     super(w, num);

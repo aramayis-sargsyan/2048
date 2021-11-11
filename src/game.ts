@@ -21,8 +21,9 @@ export class Game extends PIXI.Application {
 
   _onLoadComplete() {
     this._buildBoard();
+    this._board.setKeyListeners();
     for (let i = 0; i < 2; i++) {
-      this._board.buildNewCell(2, null);
+      this._board.buildNewCell(null, [0, i + 1]);
     }
   }
 
