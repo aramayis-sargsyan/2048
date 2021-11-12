@@ -24,7 +24,7 @@ export const getEmptyCells = (newCell, index) => {
 
 export const getRandomNumber = () => {
   const num = Math.random();
-  if (num < 0.1) {
+  if (num < 0) {
     return 4;
   } else {
     return 2;

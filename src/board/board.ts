@@ -85,88 +85,103 @@ export class Board extends Container {
       let x = 0;
       for (let j = 0; j < cell_length; j++) {
         if (this.newCells[i][j] && x === 0) {
-          promises.push(this.transferCell(x, i, j));
-          x += 1;
-        } else if (this.newCells[i][j] && x > 0) {
-          x += this.joinCell(x, i, j, promises);
+          x += this.firstCellTransfer(x, i, j, promises);
+        } else if (this.newCells[i][j]) {
+          if (this.newCells[i][x - 1].text === this.newCells[i][j].text) {
+            x += this.cellJoin(x, i, j, promises);
+          } else {
+            x += this.cellTransfer(x, i, j, promises);
+          }
         }
       }
     }
 
-    Promise.all(promises).then((result) => {
+    Promise.all(promises).then(() => {
+      console.log(7);
+
       this.backCells = rotateMatrix(41 - key.keyCode, this.backCells);
       this.newCells = rotateMatrix(41 - key.keyCode, this.newCells);
-      console.log(this.newCells);
 
       this.buildNewCell(null, null);
       this.setKeyListeners();
+      console.log(this.newCells);
     });
   }
 
-  async transferCell(x, i, j): Promise<void> {
+  firstCellTransfer(x, i, j, promises) {
+    console.log(1);
+
     const { cell_length } = boardConfig;
 
-    return new Promise((resolve) => {
+    let prom = new Promise((resolve) => {
+      console.log(x);
       gsap.to(this.newCells[i][j], {
         x: this.backCells[i][x].position.x,
         y: this.backCells[i][x].position.y,
         duration: 0.2,
         ease: Circ.easeOut,
         onComplete: () => {
-          if (j !== x) {
+          if (j !== x && this.newCells[i][j] === this.newCells[i][x]) {
             this.newCells[i][j] = null;
           }
-          console.table(this.newCells);
-          resolve();
+          resolve(0);
         },
       });
       this.newCells[i][x] = this.newCells[i][j];
     });
+    promises.push(prom);
+    return 1;
   }
 
-  joinCell(x, i, j, promises) {
-    console.log(i);
-    console.log(j);
-    console.log(x);
-
-    if (this.newCells[i][x - 1].text === this.newCells[i][j].text) {
-      let prom = new Promise((resolve) => {
-        console.table(this.newCells);
-        gsap.to(this.newCells[i][j], {
-          x: this.backCells[i][x - 1].position.x,
-          y: this.backCells[i][x - 1].position.y,
-          duration: 0.2,
-          ease: Circ.easeOut,
-          onComplete: () => {
-            this.newCells[i][j].destroy();
-            this.newCells[i][x - 1].destroy();
-            this.buildNewCell(this.newCells[i][x - 1].text * 2, [i, x - 1]);
+  cellTransfer(x, i, j, promises) {
+    let prom = new Promise((resolve) => {
+      gsap.to(this.newCells[i][j], {
+        x: this.backCells[i][x].position.x,
+        y: this.backCells[i][x].position.y,
+        duration: 0.2,
+        ease: Circ.easeOut,
+        onComplete: () => {
+          this.newCells[i][x] = this.newCells[i][j];
+          if (j !== x) {
             this.newCells[i][j] = null;
-            resolve(0);
-          },
-        });
+          }
+          resolve(0);
+        },
       });
-      promises.push(prom);
-      return 0;
-    } else {
-      let prom = new Promise((resolve) => {
-        gsap.to(this.newCells[i][j], {
-          x: this.backCells[i][x].position.x,
-          y: this.backCells[i][x].position.y,
-          duration: 0.2,
-          ease: Circ.easeOut,
-          onComplete: () => {
-            if (j !== x) {
-              this.newCells[i][j] = null;
-            }
-            resolve(0);
-          },
-        });
-        this.newCells[i][x] = this.newCells[i][j];
+      console.log(x);
+
+      console.log(this.newCells[i][x - 1].text);
+    });
+    promises.push(prom);
+    return 1;
+  }
+
+  cellJoin(x, i, j, promises) {
+    let prom = new Promise((resolve) => {
+      gsap.to(this.newCells[i][j], {
+        x: this.backCells[i][x - 1].position.x,
+        y: this.backCells[i][x - 1].position.y,
+        duration: 0.2,
+        ease: Circ.easeOut,
+        onComplete: () => {
+          this.newCells[i][x - 1].destroy();
+          console.warn(x);
+          console.warn(this.newCells[i][x - 1].text);
+          this.buildNewCell(this.newCells[i][x - 1].text, [i, x - 1]);
+
+          this.newCells[i][j].destroy();
+          this.newCells[i][j] = null;
+          resolve(0);
+        },
       });
-      promises.push(prom);
-      return 1;
-    }
+
+      this.newCells[i][x - 1].text *= 2;
+      console.log(x);
+      console.log(this.newCells[i][x - 1].text);
+    });
+    promises.push(prom);
+
+    return 0;
   }
 
   onKeyDown(key) {
